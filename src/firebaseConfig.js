@@ -9,4 +9,14 @@ const firebaseConfig = {
   measurementId: "G-V06NKSPQJJ"
 }
 
-export default firebaseConfig;
+const uiConfig = (firebase) => ({
+  signInOptions: [
+    firebase.auth.EmailAuthProvider.PROVIDER_ID,
+    firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+    firebase.auth.TwitterAuthProvider.PROVIDER_ID
+  ],
+  signInFlow: "popup"
+});
+
+export {firebaseConfig, uiConfig};

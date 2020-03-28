@@ -2,21 +2,11 @@ import React, { Component } from "react";
 import * as firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
-import firebaseConfig from "./firebaseConfig";
+import * as config from "./firebaseConfig";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(config.firebaseConfig);
 const db = firebase.firestore();
-
-const uiConfig = {
-  signInOptions: [
-    firebase.auth.EmailAuthProvider.PROVIDER_ID,
-    firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-    firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-    firebase.auth.TwitterAuthProvider.PROVIDER_ID
-  ],
-  signInFlow: "popup"
-};
 
 class App extends Component {
   constructor() {
@@ -45,7 +35,7 @@ class App extends Component {
           </>
         ) : (
           <StyledFirebaseAuth
-            uiConfig={uiConfig}
+            uiConfig={config.uiConfig(firebase)}
             firebaseAuth={firebase.auth()}
           />
         )}
