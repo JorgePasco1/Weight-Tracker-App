@@ -43,6 +43,23 @@ class App extends Component {
   }
 
   render() {
+    let chartZone;
+
+    if (this.state.dataReceived && this.state.labels.length > 0) {
+      chartZone = (
+        <WeightChart
+          chartLabels={this.state.labels}
+          chartData={this.state.data}
+        />
+      );
+    } else if (this.state.dataReceived && this.state.labels.length == 0) {
+      chartZone = (
+        <div>No data registered. Add a new record to see a chart.</div>
+      );
+    } else {
+      chartZone = <div>Loading chart...</div>;
+    }
+
     return (
       <div className="App">
         {this.state.fireAuthLoading ? (
@@ -51,14 +68,7 @@ class App extends Component {
           <>
             <div>Signed In</div>
             <WeightForm registerEntry={this.registerEntry} />
-            {this.state.dataReceived ? (
-              <WeightChart
-                chartLabels={this.state.labels}
-                chartData={this.state.data}
-              />
-            ) : (
-              <div>Loading chart...</div>
-            )}
+            {chartZone}
             <button onClick={() => firebase.auth().signOut()}>Sign out</button>
           </>
         ) : (
@@ -72,8 +82,9 @@ class App extends Component {
   }
 
   registerEntry = (label, data) => {
-    console.log("label:", label);
-    console.log("data:", data);
+    console.log("Data registered!");
+    console.log("Registered label:", label);
+    console.log("Registered data:", data);
   };
 
   getData = userId => {
@@ -89,7 +100,6 @@ class App extends Component {
           catchedData = doc.data().data;
         });
         console.log("Data not catched. State:", this.state);
-        
       })
       .then(() => {
         this.setState(prevState => ({
@@ -98,8 +108,8 @@ class App extends Component {
           data: catchedData ? catchedData : [],
           dataReceived: true
         }));
-        console.log("Data cached. State:" , this.state)
-      })
+        console.log("Data cached. State:", this.state);
+      });
   };
 }
 
