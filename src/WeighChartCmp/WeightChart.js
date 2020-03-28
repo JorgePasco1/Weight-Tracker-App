@@ -22,9 +22,6 @@ export default class WeightChart extends Component {
   buildChart = () => {
     const weightChartRef = this.chartRef.current.getContext("2d");
     const { chartLabels, chartData } = this.props;
-    console.log("passed data", chartData)
-    console.log("pased labels", chartLabels);
-    
 
     if (typeof myLineChart !== "undefined") myLineChart.destroy();
 

@@ -14,11 +14,11 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      loading: true,
       isSignedIn: false,
       labels: [],
       data: [],
-      fireAuthLoading: true
+      fireAuthLoading: true,
+      dataReceived: false
     };
   }
 
@@ -42,14 +42,20 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        { this.state.fireAuthLoading ? (
-          <div>Loading...</div> 
+        {this.state.fireAuthLoading ? (
+          <div>Loading...</div>
         ) : this.state.isSignedIn ? (
           <>
             <div>Signed In</div>
             <WeightForm registerEntry={this.registerEntry} />
-            {/* TODO: Fix WeightChart rendering before data passed */}
-            <WeightChart chartLabels={this.state.labels} chartData={this.state.data} />
+            {this.state.dataReceived ? (
+              <WeightChart
+                chartLabels={this.state.labels}
+                chartData={this.state.data}
+              />
+            ) : (
+              <div>Loading chart...</div>
+            )}
             <button onClick={() => firebase.auth().signOut()}>Sign out</button>
           </>
         ) : (
@@ -76,21 +82,17 @@ class App extends Component {
       .get()
       .then(querySnapshot => {
         querySnapshot.forEach(doc => {
-          console.log(doc);
           catchedLabels = doc.data().labels;
           catchedData = doc.data().data;
         });
       })
       .then(() => {
-        if (catchedLabels) {
-          this.setState(prevState => ({
-            ...prevState,
-            labels: catchedLabels,
-            data: catchedData
-          }));
-        }
-        console.log("state labels", this.state.labels);
-        console.log("state data", this.state.data);
+        this.setState(prevState => ({
+          ...prevState,
+          labels: catchedLabels ? catchedLabels : [],
+          data: catchedData ? catchedData : [],
+          dataReceived: true
+        }));
       });
   };
 }
