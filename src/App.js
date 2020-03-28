@@ -27,11 +27,14 @@ class App extends Component {
       this.setState(prevState => ({
         ...prevState,
         fireAuthLoading: false,
-        isSignedIn: !!user
+        isSignedIn: !!user,
+        labels: [],
+        data: [],
+        dataReceived: false
       }));
 
       if (user) {
-        // console.log(user.uid);
+        console.log("user id", user.uid);
         this.getData(user.uid);
       }
 
@@ -85,6 +88,8 @@ class App extends Component {
           catchedLabels = doc.data().labels;
           catchedData = doc.data().data;
         });
+        console.log("Data not catched. State:", this.state);
+        
       })
       .then(() => {
         this.setState(prevState => ({
@@ -93,7 +98,8 @@ class App extends Component {
           data: catchedData ? catchedData : [],
           dataReceived: true
         }));
-      });
+        console.log("Data cached. State:" , this.state)
+      })
   };
 }
 
