@@ -17,7 +17,8 @@ class App extends Component {
       loading: true,
       isSignedIn: false,
       labels: [],
-      data: []
+      data: [],
+      fireAuthLoading: true
     };
   }
 
@@ -25,6 +26,7 @@ class App extends Component {
     firebase.auth().onAuthStateChanged(user => {
       this.setState(prevState => ({
         ...prevState,
+        fireAuthLoading: false,
         isSignedIn: !!user
       }));
 
@@ -40,10 +42,13 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        {this.state.isSignedIn ? (
+        { this.state.fireAuthLoading ? (
+          <div>Loading...</div> 
+        ) : this.state.isSignedIn ? (
           <>
             <div>Signed In</div>
             <WeightForm registerEntry={this.registerEntry} />
+            {/* TODO: Fix WeightChart rendering before data passed */}
             <WeightChart chartLabels={this.state.labels} chartData={this.state.data} />
             <button onClick={() => firebase.auth().signOut()}>Sign out</button>
           </>
