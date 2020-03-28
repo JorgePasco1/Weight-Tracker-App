@@ -1,3 +1,10 @@
+# Weight Tracker App
+
+Practice React Project. The app lets the user login and register weight logs for different dates and displays them in a chart.
+The project uses firebase's firestore and authentication service, and chartjs for displaying data.
+
+# Create React App
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
