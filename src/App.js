@@ -23,28 +23,17 @@ class App extends Component {
 
   componentDidMount() {
     firebase.auth().onAuthStateChanged(user => {
-      let labels;
-      let data;
-
-      console.log(user.uid);
       this.setState(prevState => ({
         ...prevState,
         isSignedIn: !!user
       }));
 
-      db.collection("chart-data")
-        .where("userId", "==", user.uid)
-        .get()
-        .then(querySnapshot => {
-          querySnapshot.forEach(doc => {
-            labels = doc.data().labels;
-            data = doc.data().data;
-          });
-        })
-        .then(() => {
-          console.log("labels", labels);
-          console.log("data", data);
-        });
+      if (user) {
+        // console.log(user.uid);
+        this.getData(user.uid);
+      }
+
+      console.log("Is signed in?", this.state.isSignedIn);
     });
   }
 
@@ -55,7 +44,7 @@ class App extends Component {
           <>
             <div>Signed In</div>
             <WeightForm registerEntry={this.registerEntry} />
-            <WeightChart />
+            <WeightChart chartLabels={this.state.labels} chartData={this.state.data} />
             <button onClick={() => firebase.auth().signOut()}>Sign out</button>
           </>
         ) : (
@@ -71,6 +60,33 @@ class App extends Component {
   registerEntry = (label, data) => {
     console.log("label:", label);
     console.log("data:", data);
+  };
+
+  getData = userId => {
+    let catchedLabels;
+    let catchedData;
+
+    db.collection("chart-data")
+      .where("userId", "==", userId)
+      .get()
+      .then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          console.log(doc);
+          catchedLabels = doc.data().labels;
+          catchedData = doc.data().data;
+        });
+      })
+      .then(() => {
+        if (catchedLabels) {
+          this.setState(prevState => ({
+            ...prevState,
+            labels: catchedLabels,
+            data: catchedData
+          }));
+        }
+        console.log("state labels", this.state.labels);
+        console.log("state data", this.state.data);
+      });
   };
 }
 
