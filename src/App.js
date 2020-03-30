@@ -83,7 +83,10 @@ class App extends Component {
             <div>
               Welcome {this.state.userName} ({this.state.userEmail})
             </div>
-            <WeightForm registerEntry={this.registerEntry} />
+            {/* Conditional rendering to prevent unexpected behaviour when submitting data before database data has finished */}
+            {this.state.finishedQuery ? (
+              <WeightForm registerEntry={this.registerEntry} />
+            ) : null}
             {chartZone}
             <button onClick={() => firebase.auth().signOut()}>Sign out</button>
           </>
@@ -97,14 +100,30 @@ class App extends Component {
     );
   }
 
+  sendToDatabase = () => {
+    db.collection("chart-data")
+      .doc(this.state.userId)
+      .set({
+        data: this.state.data,
+        labels: this.state.labels
+        // data: this.state.data,
+        // labels: this.state.labels
+      })
+      .then(() => {
+        console.log("Document succesfully written");
+      })
+      .catch(function(error) {
+        console.error("Error writing document: ", error);
+      });
+  };
+
   registerEntry = (label, data) => {
     //TODO: Add the entry to the state and send it to the database in the background
     this.setState(prevState => ({
       ...prevState,
       labels: [...prevState.labels, label],
       data: [...prevState.data, data]
-    }));
-
+    }), this.sendToDatabase);
   };
 
   getData = userId => {
@@ -112,26 +131,32 @@ class App extends Component {
     let catchedData;
     let docExist = false;
 
-    let docRef = db.collection("chart-data").doc(this.state.userId);
+    const docRef = db.collection("chart-data").doc(this.state.userId);
 
-    docRef.get().then(doc => {
-      if (doc.exists) {
-        docExist = true;
-        catchedLabels = doc.data().labels;
-        catchedData = doc.data().data;
-      }
-      console.log("Data not catched. State:", this.state);
-    }).then(() => {
-      console.log("catched doc exists:", docExist);
-      this.setState(prevState => ({
-        ...prevState,
-        hasDocument: docExist,
-        labels: docExist ? catchedLabels : [],
-        data: docExist ? catchedData : [],
-        finishedQuery: true
-      }));
-      console.log("Data cached. State:", this.state);
-    })
+    docRef
+      .get()
+      .then(doc => {
+        if (doc.exists) {
+          docExist = true;
+          catchedLabels = doc.data().labels;
+          catchedData = doc.data().data;
+        }
+        this.setState(prevState => ({
+          ...prevState,
+          finishedQuery: false
+        }));
+        console.log("State not set:", this.state);
+      })
+      .then(() => {
+        this.setState(prevState => ({
+          ...prevState,
+          hasDocument: docExist,
+          labels: catchedLabels ? catchedLabels : [],
+          data: catchedData ? catchedData : [],
+          finishedQuery: true
+        }));
+        console.log("State set:", this.state);
+      });
   };
 }
 
