@@ -15,6 +15,9 @@ class App extends Component {
     super();
     this.state = {
       isSignedIn: false,
+      userId: "",
+      userName: "",
+      userEmail: "",
       labels: [],
       data: [],
       fireAuthLoading: true,
@@ -26,6 +29,9 @@ class App extends Component {
     firebase.auth().onAuthStateChanged(user => {
       this.setState(prevState => ({
         ...prevState,
+        userId: user ? user.uid : "",
+        userName: user ? user.displayName : "",
+        userEmail: user ? user.email : "",
         fireAuthLoading: false,
         isSignedIn: !!user,
         labels: [],
@@ -34,7 +40,7 @@ class App extends Component {
       }));
 
       if (user) {
-        console.log("user id", user.uid);
+        console.log("user data:", user);
         this.getData(user.uid);
       }
 
@@ -52,9 +58,11 @@ class App extends Component {
           chartData={this.state.data}
         />
       );
-    } else if (this.state.dataReceived && this.state.labels.length == 0) {
+    } else if (this.state.dataReceived && this.state.labels.length === 0) {
       chartZone = (
-        <div>No data registered. Add a new record to see a chart.</div>
+        <div>
+          No data registered. Add your first record above to see a chart <span role="img" aria-label="Chart Emoji">📈</span>.
+        </div>
       );
     } else {
       chartZone = <div>Loading chart...</div>;
@@ -66,7 +74,9 @@ class App extends Component {
           <div>Loading...</div>
         ) : this.state.isSignedIn ? (
           <>
-            <div>Signed In</div>
+            <div>
+              Welcome {this.state.userName} ({this.state.userEmail})
+            </div>
             <WeightForm registerEntry={this.registerEntry} />
             {chartZone}
             <button onClick={() => firebase.auth().signOut()}>Sign out</button>
@@ -82,9 +92,12 @@ class App extends Component {
   }
 
   registerEntry = (label, data) => {
-    console.log("Data registered!");
-    console.log("Registered label:", label);
-    console.log("Registered data:", data);
+    //TODO: Add the entry to the state and send it to the database in the background
+    this.setState(prevState => ({
+      ...prevState,
+      labels: [...prevState.labels, label],
+      data: [...prevState.data, data]
+    }));
   };
 
   getData = userId => {
@@ -100,6 +113,10 @@ class App extends Component {
           catchedData = doc.data().data;
         });
         console.log("Data not catched. State:", this.state);
+        this.setState(prevState => ({
+          ...prevState,
+          dataReceived: false
+        }));
       })
       .then(() => {
         this.setState(prevState => ({

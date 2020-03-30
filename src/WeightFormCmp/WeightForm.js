@@ -19,6 +19,7 @@ export default class WeightForm extends Component {
 
   handleSubmit = event => {
     event.preventDefault();
+    this.setState({ inputDate: "", inputWeight: "" });
     this.props.registerEntry(this.state.inputDate, this.state.inputWeight);
   };
 

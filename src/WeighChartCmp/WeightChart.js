@@ -11,6 +11,10 @@ export default class WeightChart extends Component {
     this.buildChart();
   }
 
+  componentDidUpdate() {
+    this.buildChart();
+  }
+
   render() {
     return (
       <div className={classes.graphContainer}>
