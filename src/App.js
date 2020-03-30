@@ -18,6 +18,7 @@ class App extends Component {
       userId: "",
       userName: "",
       userEmail: "",
+      hasDocument: false,
       labels: [],
       data: [],
       fireAuthLoading: true,
@@ -32,6 +33,7 @@ class App extends Component {
         userId: user ? user.uid : "",
         userName: user ? user.displayName : "",
         userEmail: user ? user.email : "",
+        hasDocument: false,
         fireAuthLoading: false,
         isSignedIn: !!user,
         labels: [],
@@ -61,7 +63,11 @@ class App extends Component {
     } else if (this.state.dataReceived && this.state.labels.length === 0) {
       chartZone = (
         <div>
-          No data registered. Add your first record above to see a chart <span role="img" aria-label="Chart Emoji">📈</span>.
+          No data registered. Add your first record above to see a chart{" "}
+          <span role="img" aria-label="Chart Emoji">
+            📈
+          </span>
+          .
         </div>
       );
     } else {
@@ -103,12 +109,14 @@ class App extends Component {
   getData = userId => {
     let catchedLabels;
     let catchedData;
+    let docExist = false;
 
     db.collection("chart-data")
       .where("userId", "==", userId)
       .get()
       .then(querySnapshot => {
         querySnapshot.forEach(doc => {
+          docExist = true;
           catchedLabels = doc.data().labels;
           catchedData = doc.data().data;
         });
@@ -119,10 +127,12 @@ class App extends Component {
         }));
       })
       .then(() => {
+        console.log("catched doc exists:", docExist);
         this.setState(prevState => ({
           ...prevState,
-          labels: catchedLabels ? catchedLabels : [],
-          data: catchedData ? catchedData : [],
+          hasDocument: docExist,
+          labels: docExist ? catchedLabels : [],
+          data: docExist ? catchedData : [],
           dataReceived: true
         }));
         console.log("Data cached. State:", this.state);
