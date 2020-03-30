@@ -101,14 +101,18 @@ class App extends Component {
   }
 
   registerEntry = (label, data) => {
-    this.setState(
-      prevState => ({
-        ...prevState,
-        labels: [...prevState.labels, label],
-        data: [...prevState.data, data]
-      }),
-      this.sendToDatabase
-    );
+    if (label && data) {
+      this.setState(
+        prevState => ({
+          ...prevState,
+          labels: [...prevState.labels, label],
+          data: [...prevState.data, data]
+        }),
+        this.sendToDatabase
+      );
+    } else {
+      alert("You can't submit an empty form!")
+    }
   };
 
   sendToDatabase = () => {

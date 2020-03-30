@@ -32,12 +32,14 @@ export default class WeightForm extends Component {
             name="inputDate"
             type="date"
             value={this.state.inputDate}
+            required
           />
           <input
             onChange={this.handleChange}
             name="inputWeight"
             type="number"
             value={this.state.inputWeight}
+            required
           />
           <button>Submit</button>
         </form>
