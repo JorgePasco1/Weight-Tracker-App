@@ -38,7 +38,7 @@ class App extends Component {
         isSignedIn: !!user,
         labels: [],
         data: [],
-        dataReceived: false
+        finishedQuery: false
       }));
 
       if (user) {
@@ -100,14 +100,23 @@ class App extends Component {
     );
   }
 
+  registerEntry = (label, data) => {
+    this.setState(
+      prevState => ({
+        ...prevState,
+        labels: [...prevState.labels, label],
+        data: [...prevState.data, data]
+      }),
+      this.sendToDatabase
+    );
+  };
+
   sendToDatabase = () => {
     db.collection("chart-data")
       .doc(this.state.userId)
       .set({
         data: this.state.data,
         labels: this.state.labels
-        // data: this.state.data,
-        // labels: this.state.labels
       })
       .then(() => {
         console.log("Document succesfully written");
@@ -115,15 +124,6 @@ class App extends Component {
       .catch(function(error) {
         console.error("Error writing document: ", error);
       });
-  };
-
-  registerEntry = (label, data) => {
-    //TODO: Add the entry to the state and send it to the database in the background
-    this.setState(prevState => ({
-      ...prevState,
-      labels: [...prevState.labels, label],
-      data: [...prevState.data, data]
-    }), this.sendToDatabase);
   };
 
   getData = userId => {
@@ -152,10 +152,15 @@ class App extends Component {
           ...prevState,
           hasDocument: docExist,
           labels: catchedLabels ? catchedLabels : [],
-          data: catchedData ? catchedData : [],
-          finishedQuery: true
+          data: catchedData ? catchedData : []
         }));
         console.log("State set:", this.state);
+      })
+      .then(() => {
+        this.setState(prevState => ({
+          ...prevState,
+          finishedQuery: true
+        }));
       });
   };
 }
