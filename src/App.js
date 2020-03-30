@@ -22,7 +22,7 @@ class App extends Component {
       labels: [],
       data: [],
       fireAuthLoading: true,
-      dataReceived: false
+      finishedQuery: false
     };
   }
 
@@ -53,14 +53,14 @@ class App extends Component {
   render() {
     let chartZone;
 
-    if (this.state.dataReceived && this.state.labels.length > 0) {
+    if (this.state.finishedQuery && this.state.labels.length > 0) {
       chartZone = (
         <WeightChart
           chartLabels={this.state.labels}
           chartData={this.state.data}
         />
       );
-    } else if (this.state.dataReceived && this.state.labels.length === 0) {
+    } else if (this.state.finishedQuery && this.state.labels.length === 0) {
       chartZone = (
         <div>
           No data registered. Add your first record above to see a chart{" "}
@@ -104,6 +104,7 @@ class App extends Component {
       labels: [...prevState.labels, label],
       data: [...prevState.data, data]
     }));
+
   };
 
   getData = userId => {
@@ -111,32 +112,26 @@ class App extends Component {
     let catchedData;
     let docExist = false;
 
-    db.collection("chart-data")
-      .where("userId", "==", userId)
-      .get()
-      .then(querySnapshot => {
-        querySnapshot.forEach(doc => {
-          docExist = true;
-          catchedLabels = doc.data().labels;
-          catchedData = doc.data().data;
-        });
-        console.log("Data not catched. State:", this.state);
-        this.setState(prevState => ({
-          ...prevState,
-          dataReceived: false
-        }));
-      })
-      .then(() => {
-        console.log("catched doc exists:", docExist);
-        this.setState(prevState => ({
-          ...prevState,
-          hasDocument: docExist,
-          labels: docExist ? catchedLabels : [],
-          data: docExist ? catchedData : [],
-          dataReceived: true
-        }));
-        console.log("Data cached. State:", this.state);
-      });
+    let docRef = db.collection("chart-data").doc(this.state.userId);
+
+    docRef.get().then(doc => {
+      if (doc.exists) {
+        docExist = true;
+        catchedLabels = doc.data().labels;
+        catchedData = doc.data().data;
+      }
+      console.log("Data not catched. State:", this.state);
+    }).then(() => {
+      console.log("catched doc exists:", docExist);
+      this.setState(prevState => ({
+        ...prevState,
+        hasDocument: docExist,
+        labels: docExist ? catchedLabels : [],
+        data: docExist ? catchedData : [],
+        finishedQuery: true
+      }));
+      console.log("Data cached. State:", this.state);
+    })
   };
 }
 
